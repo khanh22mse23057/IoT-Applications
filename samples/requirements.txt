@@ -1,0 +1,2 @@
+paho-mqtt==1.6.1
+adafruit-io==2.3.1
