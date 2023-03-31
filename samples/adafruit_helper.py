@@ -8,7 +8,7 @@ from Adafruit_IO import MQTTClient
 # Define callback functions which will be called when certain events happen.
 def connected(client):
 # Connected function will be called when the client connects.
-    client.subscribe(Cons.Feeds.Feed1, config.ADAFRUIT_IO_USERNAME)
+    client.subscribe(Cons.Feeds.Feed1.value)
 
 def disconnected(client):
     print('Disconnected from Adafruit IO!')
@@ -27,6 +27,7 @@ def ping():
     mqtt_client.on_connect = connected
     mqtt_client.on_disconnect = disconnected
     mqtt_client.on_message = message
+
     # Connect to the Adafruit IO server.
     mqtt_client.connect()
     mqtt_client.loop_background()
