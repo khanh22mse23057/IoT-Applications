@@ -26,17 +26,19 @@ def sample1_publishing():
 
 
 #************************************************************************************************************************
-def subscribe(client: mqtt_client):
-    def on_message(client, userdata, msg):
-        print(f"Received `{msg.payload.decode()}` from `{msg.topic}` topic")
+def subscribe(client: mqtt_client, feed_id):
+    def on_message(client, feed_id, payload):
+        print(f"Received `{payload}` from `{feed_id}` topic")        
 
-    client.subscribe(Cons.Feeds.Feed1.value)
+    client.subscribe(feed_id)
     client.on_message = on_message
 
 def sample2_subscribing():    
-    _count = 0
+    subscribe(mqtt_client, Cons.Feeds.Feed1.value)
     while True: 
-        subscribe(mqtt_client)
+        # TODO: Add implementation
+        pass
+        
 
 #************************************************************************************************************************
 def run():
