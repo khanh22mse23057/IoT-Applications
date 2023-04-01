@@ -1,0 +1,2 @@
+0 un-mask
+1 mask

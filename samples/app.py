@@ -3,7 +3,7 @@ import random
 import constants as Cons
 import config
 from adafruit_helper import *
-
+from mask_detection import *
 #************************************************************************************************************************
 def publish(count, max_count=5):
     
@@ -44,4 +44,7 @@ def sample2_subscribing():
 def run():
     
     #sample1_publishing()
-    sample2_subscribing()
+    #sample2_subscribing()
+    #image_detector()
+    run_camera(mqtt_client)
+

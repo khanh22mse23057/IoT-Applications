@@ -1,5 +1,5 @@
 #Step Project on VSCode
-1. Go to the project folder and run the command :
+==>Go to the project folder and run the command :
 
 1. python -m venv .env
 2. .\.env\Scripts\activate
