@@ -6,6 +6,6 @@
 
 from enum import Enum
 class Feeds(Enum):
-    Feed1 = 'mse11-sensor01'
+    Feed1 = 'logs'
     Feed2 = 'mse11-sensor02'
     Feed3 = 'mse11-sensor03'

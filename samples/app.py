@@ -27,15 +27,15 @@ def sample1_publishing():
 
 
 #************************************************************************************************************************
-def subscribe(client: mqtt_client, feed_id):
+def subscribe(client, feed_id):
     def on_message(client, feed_id, payload):
         print(f"Received `{payload}` from `{feed_id}` topic")        
 
     client.subscribe(feed_id)
     client.on_message = on_message
 
-def sample2_subscribing():    
-    subscribe(mqtt_client, Cons.Feeds.Feed1.value)
+def sample2_subscribing(client):    
+    subscribe(mqtt_client, "btn_stage")
     while True: 
         # TODO: Add implementation
         pass
@@ -45,8 +45,8 @@ def sample2_subscribing():
 def run():
     
     #sample1_publishing()
-    #sample2_subscribing()
-    #image_detector()
-    #run_camera(mqtt_client)
-    yolobit_run(mqtt_client)
+    #sample2_subscribing(mqtt_client)
+
+    run_detection(mqtt_client)
+    #yolobit_run(mqtt_client)
 

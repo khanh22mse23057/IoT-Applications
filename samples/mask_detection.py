@@ -1,28 +1,46 @@
 from keras.models import load_model  # TensorFlow is required for Keras to work
-from PIL import Image, ImageOps  # Install pillow instead of PIL
+import cv2  # Install opencv-python
 import numpy as np
-import cv2  # Install opencv-pytho
 import base64
 import time
-
+import imutils
+ 
 
 def on_publish(client, userdata, mid):
     print("Image published to Adafruit!")
 
-def run_camera(client):
+def image_pushing(client, image, state):
+
+    resized = imutils.resize(image, width=400)
+    #res, frame = cv2.imencode('.jpg', image)  # from image to binary buffer            
+    # Encode the resized image to JPG format with compression quality of 5%
+    encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), 50]
+    # Compress the image
+    result, encimg = cv2.imencode('.jpg', resized, encode_param)
+    # Calculate the size of the encoded image in bytes
+    size_in_bytes = encimg.shape[0]
+
+    # Check if the size is less than 1KB
+    if size_in_bytes < 102400 :
+        client.publish("imask", base64.b64encode(encimg))
+        client.publish("message", state)
+        client.on_publish = on_publish
+        time.sleep(1)  
+    else:
+        print("Image size exceeds 100KB limit")   
+
+        
+def run_detection(client):
+
+    count = -1
     # Disable scientific notation for clarity
     np.set_printoptions(suppress=True)
-
     # Load the model
-    model = load_model(".\input_model\keras_Model.h5", compile=False)
-
+    model = load_model(".\\input_model\\keras_Model.h5", compile=False)
     # Load the labels
-    class_names = open(".\input_model\labels.txt", "r").readlines()
-
+    class_names = open(".\\input_model\\labels.txt", "r").readlines()
     # CAMERA can be 0 or 1 based on default camera of your computer
     camera = cv2.VideoCapture(0)
-
-    count = 1
     while True:
             # Grab the webcamera's image.
             ret, _image = camera.read()
@@ -48,18 +66,11 @@ def run_camera(client):
             # Print prediction and confidence score
             print("Class:", class_name[2:], end="")
             print("Confidence Score:", str(np.round(confidence_score * 100))[:-2], "%")
-            
 
-            feed_id= ("mse11-mask_detection" if class_name[2:] == "mask" else "mse11-unmask_detection")
-            if count > 0:
-                small_Img = cv2.resize(image, (300, 300), interpolation=cv2.INTER_AREA)  
-                res, frame = cv2.imencode('.jpg', small_Img)  # from image to binary buffer            
-                client.publish(feed_id, base64.b64encode(frame))
-                client.on_publish = on_publish
-                count = count - 1
-                #client.loop(2)
-                time.sleep(1)                
-                
+            if count % 10000 == 0:
+                image_pushing(client, _image, class_name[2:])
+            count = count + 1  
+
             # Listen to the keyboard for presses.
             keyboard_input = cv2.waitKey(1)
 
@@ -70,5 +81,6 @@ def run_camera(client):
     camera.release()
     cv2.destroyAllWindows()
 
+    
 
-        
+

@@ -5,6 +5,8 @@ import  sys
 from  Adafruit_IO import  MQTTClient
 import config
 
+mess = ""
+ser = ""
 
 def getPort():
     ports = serial.tools.list_ports.comports()
@@ -16,11 +18,7 @@ def getPort():
         if "USB Serial Device" in strPort:
             splitPort = strPort.split(" ")
             commPort = (splitPort[0])
-    return "COM6"
-
-ser = serial.Serial( port=getPort(), baudrate=115200)
-
-mess = ""
+    return commPort
 
 def processData(client, data):
     data = data.replace("!", "")
@@ -30,7 +28,7 @@ def processData(client, data):
     if splitData[1] == "TEMP":
         client.publish("bbc-temp", splitData[2])
 
-mess = ""
+
 
 def readSerial(client, count =1):
     bytesToRead = ser.inWaiting()
@@ -52,8 +50,12 @@ def push_data(client, temp, hum):
     client.publish("classroom_humidity", temp)
     client.publish("classroom_temperature", hum)
 
+def connect_device():
+    ser = serial.Serial( port=getPort(), baudrate=115200)
+
 def yolobit_run(client):
     count = 1
+    connect_device()
     while True:
         readSerial(client, count)
         time.sleep(1)
