@@ -1,2 +1,2 @@
-0 mask
-1 unmask
+0 wear mask 
+1 unwear mask 

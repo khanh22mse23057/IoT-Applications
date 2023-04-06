@@ -4,9 +4,10 @@ import time
 import  sys
 from  Adafruit_IO import  MQTTClient
 import config
+import threading
 
 mess = ""
-ser = ""
+
 
 def getPort():
     ports = serial.tools.list_ports.comports()
@@ -18,44 +19,53 @@ def getPort():
         if "USB Serial Device" in strPort:
             splitPort = strPort.split(" ")
             commPort = (splitPort[0])
-    return commPort
+    return "COM6"
+
+def data_pushing(client, feed_id, value):
+    time.sleep(30)
+    client.publish(feed_id, value)
+    print('Publishing value: [{0}] to [{1}].'.format(value, feed_id))  
 
 def processData(client, data):
+    print(data)
+    
     data = data.replace("!", "")
     data = data.replace("#", "")
     splitData = data.split(":")
-    print(splitData)
-    if splitData[1] == "TEMP":
-        client.publish("bbc-temp", splitData[2])
+
+    feed_id = ("classroom_humidity" if splitData[1] == "H" else "classroom_temperature")
+    t = threading.Thread(target=data_pushing, args=(client,feed_id,splitData[2]))
+    t.start()
 
 
+def writeData(com_ser, data):
+    print(data)
+    com_ser.write(str(data).encode())
+   
 
-def readSerial(client, count =1):
-    bytesToRead = ser.inWaiting()
+def readSerial(com_ser, client, count =1):
+    bytesToRead = com_ser.inWaiting()
     if (bytesToRead > 0):
         global mess
-        mess = mess + ser.read(bytesToRead).decode("UTF-8")
+        mess = mess + com_ser.read(bytesToRead).decode("UTF-8")
         print(mess)
         while ("#" in mess) and ("!" in mess):
             start = mess.find("!")
             end = mess.find("#")
-            #processData(mess[start:end + 1])
-
-            if (end == len(mess)):
-                mess = ""
-            else:
-                mess = mess[end+1:]
+            processData(client, mess[start:end + 1])
+            mess = (mess[end+1:], "")[end == len(mess)]
 
 def push_data(client, temp, hum):
     client.publish("classroom_humidity", temp)
     client.publish("classroom_temperature", hum)
 
 def connect_device():
-    ser = serial.Serial( port=getPort(), baudrate=115200)
-
+    return serial.Serial( port=getPort(), baudrate=115200)
+     
+   
 def yolobit_run(client):
     count = 1
-    connect_device()
+    com_ser = connect_device()
     while True:
-        readSerial(client, count)
+        readSerial(com_ser, client, count)
         time.sleep(1)

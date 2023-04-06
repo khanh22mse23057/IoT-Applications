@@ -45,8 +45,8 @@ def sample2_subscribing(client):
 def run():
     
     #sample1_publishing()
-    #sample2_subscribing(mqtt_client)
+    sample2_subscribing(mqtt_client)
 
-    run_detection(mqtt_client)
+    #run_detection(mqtt_client)
     #yolobit_run(mqtt_client)
 

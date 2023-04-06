@@ -8,7 +8,10 @@ from Adafruit_IO import MQTTClient
 # Define callback functions which will be called when certain events happen.
 def connected(client):
 # Connected function will be called when the client connects.
-    client.subscribe(Cons.Feeds.Feed1.value)
+    for feed in (Cons.Feeds):
+        print('Subscribe value: [{0}] .'.format(feed.value))  
+        client.subscribe(feed.value)
+    
 
 def disconnected(client):
     print('Disconnected from Adafruit IO!')
