@@ -25,7 +25,7 @@ relay1_OFF = [0, 6, 0, 0, 0, 0, 136, 27]
 
 # Send command to Actuators
 def setDevice1(ser, state):
-    print("State: " + str(state))
+    print("setDevice1 => State: " + str(state))
     if state == True:
         ser.write(relay1_ON)
     else:
@@ -39,7 +39,7 @@ relay2_OFF = [15, 6, 0, 0, 0, 0, 136, 228]
 
 
 def setDevice2(ser, state):
-    print("State" + state)
+    print("setDevice2 ==> State" + str(state))
     if state == True:
         ser.write(relay2_ON)
     else:
@@ -83,6 +83,7 @@ def readMoisture(ser):
 #     time.sleep(5)
 
 def start(serCom, state):
+    #setDevice2(serCom, state)
     return setDevice1(serCom, state)
 
     # t = threading.Thread(target=data_pushing, args=(count))
