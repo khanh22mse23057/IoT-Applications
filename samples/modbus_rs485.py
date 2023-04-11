@@ -89,29 +89,36 @@ def start(serCom, state):
     # t = threading.Thread(target=data_pushing, args=(count))
     # t.start()
 
-def push_device(state):
-    port = getPort()
-
+def push_device(serialPort, state):
+    port =   getPort()
     if port != "None":
         print("****** Port found" + port)
         serCom = serial.Serial(port=port, baudrate=9600)
         start(serCom, state)
 
 
-def subscribe(client, feed_id):
+def subscribe(serCom, client, feed_id):
     def on_message(client, feed_id, payload):
         print(f"Received `{payload}` from `{feed_id}` topic")
-        state = str(payload) == "1"
-        push_device(state)  
+        state = int(payload) == 1
+        start(serCom, state)
 
     client.subscribe(feed_id)
     client.on_message = on_message
 
 def mobbus_run(client):    
     print("****** Sensor and Actuators")
-    subscribe(client, "btn_stage")
+
+    port = getPort()
+    if port != "None":
+        print("****** Port found" + port)
+        serCom = serial.Serial(port=port, baudrate=9600)
+        subscribe(serCom, client, "btn_stage")
+
     while True: 
         # TODO: Add implementation
+        if port != "None":
+            port = getPort()
         pass
 
 # def mobbus_run():
