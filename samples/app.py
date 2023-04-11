@@ -2,6 +2,7 @@
 from mask_detection import *
 from yolobit import *
 from modbus_rs485 import *
+from mqtt_service import *
 
 def run():    
     #sample1_publishing()
@@ -9,5 +10,6 @@ def run():
 
     #run_detection(mqtt_client)
     #yolobit_run(mqtt_client)
-    mobbus_run()
+    adafruit_run()
+    mobbus_run(mqtt_client)
 

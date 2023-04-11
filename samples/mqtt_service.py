@@ -3,7 +3,6 @@ import time
 import random
 import constants as Cons
 import config
-
 from adafruit_helper import *
 
 #************************************************************************************************************************

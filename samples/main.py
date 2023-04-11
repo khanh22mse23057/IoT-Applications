@@ -1,8 +1,8 @@
 from app import run
-from adafruit_helper import ping
+from mqtt_service import *
 
 def main():
-    #ping()
+    ping()
     run() 
 
 if __name__ == '__main__':

@@ -1,6 +1,7 @@
 import time
 import serial.tools.list_ports
 import threading
+from Adafruit_IO import MQTTClient
 
 # Get serial com port
 def getPort():
@@ -13,7 +14,7 @@ def getPort():
         if "USB Serial" in strPort:
             splitPort = strPort.split(" ")
             commPort = (splitPort[0])
-    return commPort
+    return "COM8"
 
 
 relay1_ON = [0,6,0,0,0,255,200,91]
@@ -24,10 +25,13 @@ relay1_OFF = [0, 6, 0, 0, 0, 0, 136, 27]
 
 # Send command to Actuators
 def setDevice1(ser, state):
+    print("State: " + str(state))
     if state == True:
         ser.write(relay1_ON)
     else:
         ser.write(relay1_OFF)
+
+    return state
 
 # Extend for the second Actuator
 relay2_ON = [15, 6, 0, 0, 0, 255, 200, 164]
@@ -35,6 +39,7 @@ relay2_OFF = [15, 6, 0, 0, 0, 0, 136, 228]
 
 
 def setDevice2(ser, state):
+    print("State" + state)
     if state == True:
         ser.write(relay2_ON)
     else:
@@ -72,25 +77,54 @@ def readMoisture(ser):
     time.sleep(1)
     return serial_read_data(ser)
 
-def data_pushing(count):
-    setDevice1(count % 2 == 0)
-    setDevice2(count % 2 != 0)
-    time.sleep(10)
+# def data_pushing():
+#     setDevice1(count % 2 == 0)
+#     setDevice2(count % 2 != 0)
+#     time.sleep(5)
 
-def start():
-    count = count + 1
-    t = threading.Thread(target=data_pushing, args=(count))
-    t.start()
+def start(serCom, state):
+    return setDevice1(serCom, state)
 
-count = 0
-def mobbus_run():
-    print("****** Sensor and Actuators")
+    # t = threading.Thread(target=data_pushing, args=(count))
+    # t.start()
 
+def push_device(state):
     port = getPort()
+
     if port != "None":
         print("****** Port found" + port)
-        serCom = serial.Serial(port=port, bauddrate=9600)
-        while True:
-            start()
-    else:
-        print("****** Port not found" + port)
+        serCom = serial.Serial(port=port, baudrate=9600)
+        start(serCom, state)
+
+
+def subscribe(client, feed_id):
+    def on_message(client, feed_id, payload):
+        print(f"Received `{payload}` from `{feed_id}` topic")
+        state = str(payload) == "1"
+        push_device(state)  
+
+    client.subscribe(feed_id)
+    client.on_message = on_message
+
+def mobbus_run(client):    
+    print("****** Sensor and Actuators")
+    subscribe(client, "btn_stage")
+    while True: 
+        # TODO: Add implementation
+        pass
+
+# def mobbus_run():
+#     print("****** Sensor and Actuators")
+
+#     port = getPort()
+#     count = 0
+#     if port != "None":
+#         print("****** Port found" + port)
+#         serCom = serial.Serial(port=port, baudrate=9600)
+#         state = False
+#         while True:
+#             state = start(serCom, state)
+#             state = not state
+#             time.sleep(5)
+#     else:
+#         print("****** Port not found" + port)
