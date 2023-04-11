@@ -67,7 +67,7 @@ def run_detection(client):
             print("Class:", class_name[2:], end="")
             print("Confidence Score:", str(np.round(confidence_score * 100))[:-2], "%")
 
-            if count % 10000 == 0:
+            if count % 5 == 0:
                 image_pushing(client, _image, class_name[2:])
             count = count + 1  
 

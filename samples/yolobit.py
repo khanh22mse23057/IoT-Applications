@@ -5,7 +5,7 @@ import  sys
 from  Adafruit_IO import  MQTTClient
 import config
 import threading
-
+import constants as Cons
 mess = ""
 
 
@@ -19,12 +19,13 @@ def getPort():
         if "USB Serial Device" in strPort:
             splitPort = strPort.split(" ")
             commPort = (splitPort[0])
-    return "COM6"
+    return "COM5"
 
 def data_pushing(client, feed_id, value):
-    time.sleep(30)
+    time.sleep(10)
     client.publish(feed_id, value)
     print('Publishing value: [{0}] to [{1}].'.format(value, feed_id))  
+    return
 
 def processData(client, data):
     print(data)
@@ -42,7 +43,6 @@ def writeData(com_ser, data):
     print(data)
     com_ser.write(str(data).encode())
    
-
 def readSerial(com_ser, client, count =1):
     bytesToRead = com_ser.inWaiting()
     if (bytesToRead > 0):
@@ -62,10 +62,33 @@ def push_data(client, temp, hum):
 def connect_device():
     return serial.Serial( port=getPort(), baudrate=115200)
      
-   
+def subscribe(com_ser, client, feed_id):
+    def on_message(client, feed_id, payload):
+        print(f"Received `{payload}` from `{feed_id}` topic")
+
+        if feed_id == Cons.Feeds.Feed2.value:
+            if payload == "1":
+                writeData(com_ser, 1)
+            else:
+                writeData(com_ser, 2)
+            return
+
+        # if feed_id == Cons.Feeds.Feed3.value:
+        #     if payload == "1":
+        #         writeData(com_ser, 3)
+        #     else:
+        #         writeData(com_ser, 4)  
+        #     return      
+
+    client.subscribe(feed_id)
+    client.on_message = on_message
+
 def yolobit_run(client):
     count = 1
     com_ser = connect_device()
+    
     while True:
         readSerial(com_ser, client, count)
+        # subscribe(com_ser, client, Cons.Feeds.Feed3)
+        subscribe(com_ser , client, Cons.Feeds.Feed2)
         time.sleep(1)
