@@ -77,11 +77,6 @@ def readMoisture(ser):
     time.sleep(1)
     return serial_read_data(ser)
 
-# def data_pushing():
-#     setDevice1(count % 2 == 0)
-#     setDevice2(count % 2 != 0)
-#     time.sleep(5)
-
 def start(serCom, state):
     #setDevice2(serCom, state)
     return setDevice1(serCom, state)
