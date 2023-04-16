@@ -2,82 +2,34 @@ import face_recognition
 import cv2
 import numpy as np
 import sys
+import os
+
 
 # This is a super simple (but slow) example of running face recognition on live video from your webcam.
 # There's a second example that's a little more complicated but runs faster.
-
 # PLEASE NOTE: This example requires OpenCV (the `cv2` library) to be installed only to read from your webcam.
 # OpenCV is *not* required to use the face_recognition library. It's only required if you want to run this
 # specific demo. If you have trouble installing it, try any of the other demos that don't require it instead.
+def encode_faces():
+    known_face_encodings =[]
+    known_face_names = []
+    folder_dir = "./images"
+    for image in os.listdir(folder_dir):
+        try:
+            face_image = face_recognition.load_image_file(f"{folder_dir}/{image}")
+            face_encoding = face_recognition.face_encodings(face_image)[0]
 
+            known_face_encodings.append(face_encoding)
+            known_face_names.append(image)
+        except:
+            print("There is no face")
+    print(known_face_names)
 
+    return known_face_encodings, known_face_names
 
+def run_face_recognition(client):
 
-def dectect1():
-    cascPath = sys.argv[1]
-    faceCascade = cv2.CascadeClassifier(cascPath)
-
-    video_capture = cv2.VideoCapture(0)
-
-    while True:
-        # Capture frame-by-frame
-        ret, frame = video_capture.read()
-
-        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-
-        faces = faceCascade.detectMultiScale(
-            gray,
-            scaleFactor=1.1,
-            minNeighbors=5,
-            minSize=(30, 30),
-            flags=cv2.cv.CV_HAAR_SCALE_IMAGE
-        )
-
-        # Draw a rectangle around the faces
-        for (x, y, w, h) in faces:
-            cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
-
-        # Display the resulting frame
-        cv2.imshow('Video', frame)
-
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
-
-    # When everything is done, release the capture
-    video_capture.release()
-    cv2.destroyAllWindows()
-
-def face_detection():
-
-    # Load a sample picture and learn how to recognize it.
-    obama_image = face_recognition.load_image_file(".\\images\\obama.jpg")
-    obama_face_encoding = face_recognition.face_encodings(obama_image)[0]
-
-    # Load a second sample picture and learn how to recognize it.
-    biden_image = face_recognition.load_image_file(".\\images\\joe_biden.jpg")
-    biden_face_encoding = face_recognition.face_encodings(biden_image)[0]
-
-    # Load a second sample picture and learn how to recognize it.
-    donal_trump = face_recognition.load_image_file(".\\images\\donal_trump.jpg")
-    donal_trump_face_encoding = face_recognition.face_encodings(donal_trump)[0]
-
-    # Load a second sample picture and learn how to recognize it.
-    khanh_pham_image = face_recognition.load_image_file(".\\images\\khanh_pham.jpg")
-    khanh_pham_face_encoding = face_recognition.face_encodings(khanh_pham_image)[0]
-
-    # Create arrays of known face encodings and their names
-    known_face_encodings = [
-        obama_face_encoding,
-        biden_face_encoding,
-        donal_trump_face_encoding,
-        khanh_pham_face_encoding
-    ]
-    known_face_names = [
-        "Barack Obama",
-        "Joe Biden",
-        "Donal Trump",
-        "Khanh Pham"
-    ]
+    known_face_encodings, known_face_names = encode_faces()
 
     # Get a reference to webcam #0 (the default one)
     video_capture = cv2.VideoCapture(0)
@@ -118,11 +70,28 @@ def face_detection():
             font = cv2.FONT_HERSHEY_DUPLEX
             cv2.putText(frame, name, (left + 6, bottom - 6), font, 1.0, (255, 255, 255), 1)
 
+            if name == "Unknown":
+                username = input("Enter username:")
+                print("Username is: " + username)
+                cv2.imwrite('./images/' + username + '.jpg', frame)
+                cv2.imshow("User Capture", frame)
+                print('taking pictures')
+
         # Display the resulting image
         cv2.imshow('Video', frame)
 
-        # Hit 'q' on the keyboard to quit!
-        if cv2.waitKey(1) & 0xFF == ord('q'):
+        key = cv2.waitKey(1)
+
+        if key == ord('x'):
+            username = input("Enter username:")
+            print("Username is: " + username)
+            cv2.imwrite('./images/' + username + '.jpg', frame)
+            cv2.imshow("User Capture", frame)
+            print('taking pictures')
+
+
+        #Hit 'q' on the keyboard to quit!
+        if key == ord('q'):
             break
 
     # Release handle to the webcam

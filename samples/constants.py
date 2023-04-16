@@ -13,6 +13,6 @@ class Feeds(Enum):
     Feed5 = 'classroom_humidity'
     Feed6 = 'classroom_temperature'
     Feed7= 'slider_bar'
-    Feed8 = 'Feed8'
+    Feed8 = 'message'
     Feed9 = 'Feed9'
     Feed10 = 'Feed10'

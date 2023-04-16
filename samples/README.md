@@ -1,7 +1,6 @@
 # FSBMSE11#HCM Khanh Pham 
 ## IoT Application
 
-
 ## There are some steps for face recognition:
 ==> Go to the project folder and run the command :
 

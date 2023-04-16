@@ -14,7 +14,7 @@ def getPort():
         if "USB Serial" in strPort:
             splitPort = strPort.split(" ")
             commPort = (splitPort[0])
-    return "COM8"
+    return "COM6"
 
 
 relay1_ON = [0,6,0,0,0,255,200,91]

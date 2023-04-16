@@ -19,7 +19,7 @@ def getPort():
         if "USB Serial Device" in strPort:
             splitPort = strPort.split(" ")
             commPort = (splitPort[0])
-    return "COM5"
+    return "COM6"
 
 def data_pushing(client, feed_id, value):
     time.sleep(10)
@@ -28,15 +28,21 @@ def data_pushing(client, feed_id, value):
     return
 
 def processData(client, data):
-    print(data)
+    try:
+            data = data.replace("!", "")
+            data = data.replace("#", "")
+            #splitData = data.split(":")
+            print("Pushing data" + data)
+            client.publish(Cons.Feeds.Feed8.value, data)
+    except:
+        print("An exception occurred")
     
-    data = data.replace("!", "")
-    data = data.replace("#", "")
-    splitData = data.split(":")
 
-    feed_id = ("classroom_humidity" if splitData[1] == "H" else "classroom_temperature")
-    t = threading.Thread(target=data_pushing, args=(client,feed_id,splitData[2]))
-    t.start()
+    
+
+    # feed_id = ("classroom_humidity" if splitData[1] == "H" else "classroom_temperature")
+    # t = threading.Thread(target=data_pushing, args=(client,feed_id,splitData[2]))
+    # t.start()
 
 
 def writeData(com_ser, data):
@@ -90,5 +96,5 @@ def yolobit_run(client):
     while True:
         readSerial(com_ser, client, count)
         # subscribe(com_ser, client, Cons.Feeds.Feed3)
-        subscribe(com_ser , client, Cons.Feeds.Feed2)
+        subscribe(com_ser , client, Cons.Feeds.Feed8)
         time.sleep(1)
