@@ -1,2 +1,6 @@
 /samples/.env
 /samples/__pycache__
+
+/src/.env
+/src/.vscode
+/src/__pycache__
