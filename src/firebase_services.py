@@ -1,6 +1,7 @@
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import db
+import json
 
 databaseURL = "https://khanhpnp-mse-default-rtdb.firebaseio.com"
 
@@ -21,7 +22,7 @@ def addFaceData(image, name):
 def writePost(postId, data):
     # postId = title.replace(" ", "") # remove all spaces
     # postId = title.lower() # convert to lowercase
-    ref.set({str(postId) : data})
+    ref.set({postId : data})
 
 
     

@@ -4,6 +4,7 @@
 # by Key	khanhpnp/feeds/bg1
 from enum import Enum
 
+IsQuit = False
 
 class Feeds(Enum):
     Feed1 = "alarm_state"
@@ -14,6 +15,6 @@ class Feeds(Enum):
     Feed6 = "temperature_meter"
     Feed7 = "message"
 
-    Feed8 = "Feed8"
+    Feed8 = "shutdown"
     Feed9 = "Feed9"
     Feed10 = "Feed10"

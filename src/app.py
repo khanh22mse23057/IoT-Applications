@@ -8,25 +8,41 @@ import firebase_services as firebase
 import uuid
 import time
 import threading
-def onUnMaskDetection(image, state):
-    print(">>>>>  onUnMaskDetection: " + state)
-    img_str = base64.b64encode(image)
-    ada.mqtt_client.publish(CONS.Feeds.Feed4.value, img_str)
-    ada.mqtt_client.publish(CONS.Feeds.Feed7.value, state)
-    firebase.writePost(uuid.uuid4(), { "image": image, "state": state }),
+from  utils import *
+
+def onUnMaskDetection(_image, imgbase64, state):
+    try:
+        print(">>>>>  onUnMaskDetection: " + state)
+        img_str = base64.b64encode(_image)
+        ada.mqtt_client.publish(CONS.Feeds.Feed4.value, imgbase64)
+        ada.mqtt_client.publish(CONS.Feeds.Feed7.value, state)
+    except Exception as e: print(e)
+
+    try:
+    
+        
+        data = { "id": str(uuid.uuid4()), "image": img_str.decode('utf-8'), "state": state }
+        firebase.writePost(data["id"], data)
+    
+    except Exception as e: print(e)
+
 
 def yolobit_on_subscribe(feed_id, payload):
 
     if feed_id == CONS.Feeds.Feed1.value:
-        yolobit.setAlarm(int(payload))
+        yolobit.setAlarm(parse_value(payload, int))
         return True
 
     if feed_id == CONS.Feeds.Feed2.value:
-        yolobit.setFan(int(payload))
+        yolobit.setFan(parse_value(payload, int))
         return True 
 
     if feed_id == CONS.Feeds.Feed3.value:
-        yolobit.setLed(int(payload))
+        yolobit.setLed(parse_value(payload, int))
+        return True
+    
+    if feed_id == CONS.Feeds.Feed8.value:        
+        CONS.IsQuit = parse_value(payload, int) == 1
         return True
     
     return False
@@ -43,24 +59,24 @@ def yolobit_on_env_sync(temperature, humidity):
     
 def run_detection():
     mdect.run_detection(onUnMaskDetection)
+
 def run():
+    ada.onRecivedData = yolobit_on_subscribe
     ada.ping()
-    # t1 = threading.Thread(target=run_detection, args=())
-    # t1.start()
+
+    t1 = threading.Thread(target=run_detection, args=())
+    t1.start()
     #frecog.run_face_recognition()
     #yolobit.__init__()
     firebase.init()
     while True:
-        # TODO: Add implementation
         #yolobit.onDataFlow(yolobit_on_env_sync)
-        firebase.writePost(uuid.uuid4(), { "image": "image", "state": "state" })
-        time.sleep(10)
         command = input()
         if command.lower() == "quit":
+            CONS.IsQuit = True
             print("Goodbye!")
             break
 
-
-    # t1.join()
+    t1.join()
     
 

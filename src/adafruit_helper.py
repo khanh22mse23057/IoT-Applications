@@ -7,6 +7,7 @@ from Adafruit_IO import MQTTClient
 # Create an MQTT client instance.
 mqtt_client  = MQTTClient(config.ADAFRUIT_IO_USERNAME, config.ADAFRUIT_IO_KEY)
 onRecivedData = None
+
 # Define callback functions which will be called when certain events happen.
 def connected(client):
 # Connected function will be called when the client connects.
@@ -19,7 +20,7 @@ def disconnected(client):
     sys.exit(1)
 
 def message(client, feed_id, payload):
-    print('Feed {0} received new value: {1}'.format(feed_id, payload))
+    print('Feed {0} received new value: {1}'.format(feed_id , "<<>Payload is too long for display>" if len(payload) > 100 else payload))
     onRecivedData(feed_id, payload)
 
 

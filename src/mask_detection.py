@@ -1,12 +1,12 @@
 from keras.models import load_model  # TensorFlow is required for Keras to work
 import cv2  # Install opencv-python
 import numpy as np
-import base64
 import time
 import imutils
 from config import *
-import threading
 import face_recognitions 
+import constants as CONS
+import base64
 
 onDetection = None
 PATH =  "./input_model"
@@ -17,17 +17,17 @@ def on_publish(client, userdata, mid):
 def processImage(image, state, onDetection):
 
     resized = imutils.resize(image, width=400)
-
-    encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), 60]
+    #res, frame = cv2.imencode('.jpg', image)  # from image to binary buffer            
+    # Encode the resized image to JPG format with compression quality of 5%
+    encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), 50]
+    # Compress the image
     result, encimg = cv2.imencode('.jpg', resized, encode_param)
+    # Calculate the size of the encoded image in bytes
     size_in_bytes = encimg.shape[0]
 
     # Check if the size is less than 1KB
     if size_in_bytes < 102400 :
-        # client.publish("imask", base64.b64encode(encimg))
-        # client.publish("message", state)
-        # client.on_publish = self.
-        onDetection(encimg, state)
+        onDetection(image, base64.b64encode(encimg), state)
         time.sleep(1)  
     else:
         print("Image size exceeds 100KB limit")  
@@ -56,6 +56,8 @@ def run_detection(onDetection):
     known_face_encodings, known_face_names = face_recognitions.encode_faces()
 
     while True:
+            if CONS.IsQuit:
+                break
             # Grab the webcamera's image.
             ret, _image = camera.read()
 
@@ -80,17 +82,17 @@ def run_detection(onDetection):
             # Print prediction and confidence score
             if last_class_name != class_name :
                 last_class_name = class_name
-                print("Class:", class_name[2:], end="")
-                print("Confidence Score:", str(np.round(confidence_score * 100))[:-2], "%")
+                # print("Class:", class_name[2:], end="")
+                # print("Confidence Score:", str(np.round(confidence_score * 100))[:-2], "%")
 
-            face_recognitions.recognize(known_face_encodings, known_face_names, _image)
-            # Display the resulting image
-            cv2.imshow('Video', _image)
-            
+                        
             if count % 1000 == 0:
-                onDetection(_image, class_name[2:])
-                time.sleep(1)
-           
+                processImage(_image, class_name[2:], onDetection)
+                time.sleep(0.1)
+
+            # face_recognitions.recognize(known_face_encodings, known_face_names, _image)
+            # # Display the resulting image
+            # cv2.imshow('Video', _image)           
             count = count + 1 
 
             # Listen to the keyboard for presses.
