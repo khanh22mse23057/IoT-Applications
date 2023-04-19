@@ -14,7 +14,7 @@ def on_publish(client, userdata, mid):
     print("Image published to Adafruit!")
 
 
-def processImage(image, state, onDetection):
+def processImage(image, state, is_stranger, onDetection):
 
     resized = imutils.resize(image, width=400)
     #res, frame = cv2.imencode('.jpg', image)  # from image to binary buffer            
@@ -27,7 +27,7 @@ def processImage(image, state, onDetection):
 
     # Check if the size is less than 1KB
     if size_in_bytes < 102400 :
-        onDetection(image, base64.b64encode(encimg), state)
+        onDetection(image, base64.b64encode(encimg), state, is_stranger)
         time.sleep(1)  
     else:
         print("Image size exceeds 100KB limit")  
@@ -38,8 +38,7 @@ def start(onDetection):
     # t.start()
 
 def run_detection(onDetection):
- 
-
+    print(">> Detecting the human face") 
     count = -1
     # Disable scientific notation for clarity
     np.set_printoptions(suppress=True)
@@ -48,11 +47,11 @@ def run_detection(onDetection):
     # Load the labels
     class_names = open(f"{PATH}/labels.txt", "r").readlines()
     # CAMERA can be 0 or 1 based on default camera of your computer
-    if checkIpCamera():
-        camera = cv2.VideoCapture(CAMERA_IP_URL)
-    else:
-        camera = cv2.VideoCapture(0)
-    # camera = cv2.VideoCapture(0)
+    # if checkIpCamera():
+    #     camera = cv2.VideoCapture(CAMERA_IP_URL)
+    # else:
+    #     camera = cv2.VideoCapture(0)
+    camera = cv2.VideoCapture(0)
     last_class_name = None
     known_face_encodings, known_face_names = face_recognitions.encode_faces()
 
@@ -60,6 +59,10 @@ def run_detection(onDetection):
             if CONS.IsRunFaceDetection == False:
                 camera.release()
                 break
+
+            if CONS.IsFaceDataSetUpdated == True:
+                known_face_encodings, known_face_names = face_recognitions.encode_faces()
+
             # Grab the webcamera's image.
             ret, _image = camera.read()
 
@@ -86,13 +89,13 @@ def run_detection(onDetection):
                 last_class_name = class_name
                 # print("Class:", class_name[2:], end="")
                 # print("Confidence Score:", str(np.round(confidence_score * 100))[:-2], "%")
+            f, object_name = face_recognitions.recognize(known_face_encodings, known_face_names, _image)
 
-                        
-            if count % 1000 == 0:
-                processImage(_image, class_name[2:], onDetection)
+            if count % 50 == 0:
+                is_stranger = (object_name == "Unknown")
+                processImage(_image, class_name[2:], is_stranger, onDetection)
                 time.sleep(0.1)
 
-            #face_recognitions.recognize(known_face_encodings, known_face_names, _image)
             # # Display the resulting image
             cv2.imshow('Video', _image)           
             count = count + 1 

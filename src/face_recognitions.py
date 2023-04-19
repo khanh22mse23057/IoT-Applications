@@ -5,7 +5,7 @@ import sys
 import os
 import importlib
 from config import *
-
+import constants as CONS
 PATH = "./images"
 
 def encode_faces():
@@ -19,9 +19,12 @@ def encode_faces():
 
             known_face_encodings.append(face_encoding)
             known_face_names.append(image)
+            CONS.FaceDataSet[image] = image
         except:
             print("There is no face")
     print(known_face_names)
+
+    CONS.IsFaceDataSetUpdated = False
 
     return known_face_encodings, known_face_names
 
@@ -33,6 +36,7 @@ def recognize(known_face_encodings, known_face_names, frame):
     face_locations = face_recognition.face_locations(rgb_frame)
     face_encodings = face_recognition.face_encodings(rgb_frame, face_locations)
 
+    name = "Unknown"
     # Loop through each face in this frame of video
     for (top, right, bottom, left), face_encoding in zip(face_locations, face_encodings):
         # See if the face is a match for the known face(s)
@@ -59,7 +63,7 @@ def recognize(known_face_encodings, known_face_names, frame):
         font = cv2.FONT_HERSHEY_DUPLEX
         cv2.putText(frame, name, (left + 6, bottom - 6), font, 1.0, (255, 255, 255), 1)
 
-    return frame
+    return frame, name
 
 
 def run_face_recognition():
@@ -109,12 +113,12 @@ def run_face_recognition():
             font = cv2.FONT_HERSHEY_DUPLEX
             cv2.putText(frame, name, (left + 6, bottom - 6), font, 1.0, (255, 255, 255), 1)
 
-            # if name == "Unknown":
-            #     username = input("Enter username:")
-            #     print("Username is: " + username)
-            #     cv2.imwrite('./images/' + username + '.jpg', frame)
-            #     cv2.imshow("User Capture", frame)
-            #     print('taking pictures')
+            if name == "Unknown":
+                # username = input("Enter username:")
+                # print("Username is: " + username)
+                # cv2.imwrite('./images/' + username + '.jpg', frame)
+                # # cv2.imshow("User Capture", frame)
+                 print('taking pictures')
 
         # Display the resulting image
         cv2.imshow('Video', frame)

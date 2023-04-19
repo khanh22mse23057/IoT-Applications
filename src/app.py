@@ -10,6 +10,7 @@ import time
 import threading
 from  utils import *
 from datetime import datetime
+import cv2
 
 TaskQueue = []
 # *********************** Yolobit Process *******************************
@@ -34,8 +35,7 @@ def yolobit_on_subscribe(feed_id, payload):
             time.sleep(2)
             Task4_Run()     
         return True
-    
-    
+        
     return False
 
 def yolobit_on_env_sync(temperature, humidity):
@@ -48,21 +48,41 @@ def yolobit_on_env_sync(temperature, humidity):
         ada.publish(ada.mqtt_client, CONS.Feeds.Feed6.value, humidity)
     
 # *********************** Mask Detection Process *******************************
-
-def on_detection(_image, imgbase64, state):
+def on_detection(_image, imgbase64, state, is_stranger = False):
     try:
-        print(">>>>>  On Mask Detection: " + state)
-        img_str = base64.b64encode(_image)
-        ada.mqtt_client.publish(CONS.Feeds.Feed4.value, imgbase64)
-        ada.mqtt_client.publish(CONS.Feeds.Feed7.value, state)
+        if CONS.Detection_Counter == 0:
+            print(">>>>>  On Mask Detection: " + state)
+            img_str = base64.b64encode(_image)
+            ada.mqtt_client.publish(CONS.Feeds.Feed4.value, imgbase64)
+            ada.mqtt_client.publish(CONS.Feeds.Feed7.value, state)
+
     except Exception as e: print(e)
 
-    try:   
-        
-        data = { "id": str(uuid.uuid4()), "image": img_str.decode('utf-8'), "state": state , "date": datetime.now().isoformat()}
-        firebase.writePost(data["id"], data)
+    _id = str(uuid.uuid4())
+    _data = { "id": _id, "image": img_str.decode('utf-8'), "name": "Unknow", "state": state , "date": datetime.now().isoformat()}
+    def processFace(_id, data):
+        try:   
+            if is_stranger:
+                CONS.Detection_Counter = CONS.Detection_Counter + 1
+
+                firebase.add_face(_id, data)
+
+                print(">> Detect Stranger")
+                cv2.imwrite('./images/' + _id + '.jpg', _image)
+                CONS.IsFaceDataSetUpdated = True    
+
+        except Exception as e: print(e)
+
+        try:
+            if CONS.Detection_Counter == 10:
+                yolobit.setAlarm(1)
+                yolobit.setLed(1)
+                CONS.Detection_Counter = 0
+        except Exception as e: print(e)
     
-    except Exception as e: print(e)
+        _t = threading.Thread(target=processFace, args=(_id, _data))
+        _t.start()
+
 
 
 # *********************** Tasks *******************************
@@ -78,12 +98,11 @@ def Task2_Run():
 def Task3_Run():
     try:
         yolobit.Run(yolobit_on_env_sync)
-
     except Exception as e: print(e)
     
 
 def Task4_Run():
-    print(">> Detecting the human face") 
+
     CONS.IsRunFaceDetection = True
     def run_detection():
         try:
@@ -102,7 +121,7 @@ def run():
 
     Task1_Run()
     Task2_Run()
-    Task3_Run()
+    # Task3_Run()
     # Task4_Run()
 
     while True:

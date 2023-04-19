@@ -27,7 +27,6 @@ def Run(_on_submit):
     # start listening for incoming data
     device.start_listening()
 
-
     on_submit = _on_submit
 
 def setLed(state):

@@ -6,6 +6,10 @@ from enum import Enum
 
 IsQuit = False
 IsRunFaceDetection = True
+Detection_Counter = 0
+IsFaceDataSetUpdated = False
+
+FaceDataSet = {}
 
 class Feeds(Enum):
     Feed1 = "alarm_state"
