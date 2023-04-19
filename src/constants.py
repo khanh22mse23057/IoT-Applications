@@ -5,6 +5,7 @@
 from enum import Enum
 
 IsQuit = False
+IsRunFaceDetection = True
 
 class Feeds(Enum):
     Feed1 = "alarm_state"

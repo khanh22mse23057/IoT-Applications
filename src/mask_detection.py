@@ -38,6 +38,7 @@ def start(onDetection):
     # t.start()
 
 def run_detection(onDetection):
+ 
 
     count = -1
     # Disable scientific notation for clarity
@@ -56,7 +57,8 @@ def run_detection(onDetection):
     known_face_encodings, known_face_names = face_recognitions.encode_faces()
 
     while True:
-            if CONS.IsQuit:
+            if CONS.IsRunFaceDetection == False:
+                camera.release()
                 break
             # Grab the webcamera's image.
             ret, _image = camera.read()
@@ -90,9 +92,9 @@ def run_detection(onDetection):
                 processImage(_image, class_name[2:], onDetection)
                 time.sleep(0.1)
 
-            # face_recognitions.recognize(known_face_encodings, known_face_names, _image)
+            #face_recognitions.recognize(known_face_encodings, known_face_names, _image)
             # # Display the resulting image
-            # cv2.imshow('Video', _image)           
+            cv2.imshow('Video', _image)           
             count = count + 1 
 
             # Listen to the keyboard for presses.

@@ -1,10 +1,11 @@
 import serial
 import threading
 import time
+from  constants import *
 class IoTDevice:
 
-    onListener = None
-    command = ""
+    on_listener = None
+    cmd_buffer = ""
 
     def __init__(self, port, baudrate=9600, timeout=1):
         self.port = port
@@ -12,21 +13,23 @@ class IoTDevice:
         self.timeout = timeout
         self.serial = None
         self.thread = None
-        self.onListener = None
+        self.on_listener = None
 
     def connect(self):
         self.serial = serial.Serial(self.port, self.baudrate, timeout=self.timeout)
 
         if self.serial != None:
-            print("Connected to {} {}".format(self.port, self.baudrate))
+            print("Connected to {0} {1}".format(self.port, self.baudrate))
 
     def disconnect(self):
         if self.serial:
             self.serial.close()
+
         if self.thread:
             self.thread.join()
 
     def send_command(self, command):
+        print("Sending command: " + str(command))
         if self.serial:
             self.serial.write(str(command).encode())
 
@@ -38,20 +41,23 @@ class IoTDevice:
         bytesToRead = self.serial.inWaiting()
  
         if (bytesToRead > 0):
-            global command
-            
-            command = command + self.serial.read(bytesToRead).decode("UTF-8")
-            print(command)
-            while ("#" in command) and ("!" in command):
-                return command
+            nData = self.serial.read(bytesToRead).decode("UTF-8")
+            self.cmd_buffer = self.cmd_buffer + nData
+            print("\n" + nData)
+            while ("#" in self.cmd_buffer) and ("!" in self.cmd_buffer):
+                return nData
 
     def listen(self):
         print(">>> Start IoTDevice Listner")
         while True:
-            data = self.serial.readline().decode().strip()
+            if IsRunFaceDetection == False:
+                self.disconnect()
+                return
+            # data = self.serial.readline().decode().strip()
+            data = self.read_command()
             if data:
                 print(data)
-                self.onListener(data)
+                self.on_listener(str(data))
 
             time.sleep(1)
 

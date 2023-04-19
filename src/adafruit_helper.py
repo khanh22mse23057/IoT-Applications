@@ -20,7 +20,7 @@ def disconnected(client):
     sys.exit(1)
 
 def message(client, feed_id, payload):
-    print('Feed {0} received new value: {1}'.format(feed_id , "<<>Payload is too long for display>" if len(payload) > 100 else payload))
+    print('Feed [{0}] received new value: {1}'.format(feed_id , ("<< Payload is too long for display >>" if len(payload) > 100 else payload)))
     onRecivedData(feed_id, payload)
 
 

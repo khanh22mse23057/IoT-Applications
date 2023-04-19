@@ -3,14 +3,14 @@ import os
 
 # Set to your Adafruit IO key.
 # Remember, your key is a secret so make sure not to publish it when you publish this code!
-ADAFRUIT_IO_KEY = ''
+ADAFRUIT_IO_KEY = 'aio_OTsK86odH0Yhwrw9CuaFZCs9t3Wo'
 # Set to your Adafruit IO username. (go to https://accounts.adafruit.com to find your username)
 ADAFRUIT_IO_USERNAME = 'khanhpnp90'
 # IO Feed Owner's username
 IO_FEED_USERNAME = 'khanhpnp90'
 
 # Define the IP address and port of the camera
-CAMERA_IP_ADDRESS = "192.168.0.178"
+CAMERA_IP_ADDRESS = ""
 CAMERA_IP_PORT = "4747"
 # Set up the URL for the camera feed
 CAMERA_IP_URL = f"http://{CAMERA_IP_ADDRESS}:{CAMERA_IP_PORT}/video"
