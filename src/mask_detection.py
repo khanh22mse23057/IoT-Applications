@@ -97,6 +97,11 @@ def run_detection(onDetection):
             if count % 50 == 0:
                 is_stranger = (object_name == "Unknown")
                 processImage(_frame, class_name[2:], is_stranger, onDetection)
+                if is_stranger:
+                    known_face_encodings, known_face_names = face_recognitions.encode_faces()
+
+   
+
                 time.sleep(0.1)
 
             # # Display the resulting image

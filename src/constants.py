@@ -12,14 +12,14 @@ IsFaceDataSetUpdated = False
 FaceDataSet = {}
 
 class Feeds(Enum):
-    Feed1 = "alarm_state"
-    Feed2 = "fan_state"
-    Feed3 = "led_state"
+    Feed1 = "alarm-state"
+    Feed2 = "fan-state"
+    Feed3 = "led-state"
     Feed4 = "image"
-    Feed5 = "humidity_meter"
-    Feed6 = "temperature_meter"
+    Feed5 = "humidity-meter"
+    Feed6 = "temperature-meter"
     Feed7 = "message"
 
     Feed8 = "shutdown"
-    Feed9 = "Feed9"
+    Feed9 = "logs"
     Feed10 = "Feed10"

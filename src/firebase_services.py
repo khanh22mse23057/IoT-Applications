@@ -10,8 +10,9 @@ ref  = None
 # Subscribe to real-time changes at the '/users' node
 
 faces_ref = None
+on_submit = None
 
-def init():
+def init(_on_submit):
     cred = credentials.Certificate("./team03-fsbmse-firebase.json")
     global default_app , ref
     default_app = firebase_admin.initialize_app(cred , {
@@ -22,6 +23,10 @@ def init():
     faces_ref = ref.child('faces')
     users_ref_stream = faces_ref.listen(handle_data_change)
 
+    global on_submit
+    on_submit= _on_submit
+
+
 
 # Define a callback function to handle incoming data changes
 def handle_data_change(event):
@@ -29,7 +34,7 @@ def handle_data_change(event):
 
         # print(f"Data changed at {event.path}: {event.data}")
         print(f"Data changed at {event.path}")
-        # Get the updated user's age and update the value at local
+        # Get the updated user's age and update the value at local+
         if event.path == '/':
             faces_ref = ref
         else:
@@ -38,8 +43,10 @@ def handle_data_change(event):
 
             if str(path[1]) == "name":
                 print(f"Value: {event.data}")
-                CONS.FaceDataSet[str(path[0])] = event.data
+                image_name = str(path[0])
+                CONS.FaceDataSet[image_name] = event.data
                 CONS.IsFaceDataSetUpdated = True
+                on_submit(image_name, event.data)
             # faces_ref = ref.child(path[0])
             # face = faces_ref.get()
             # update_face_dataset(face)

@@ -14,7 +14,7 @@ def Run(_on_submit):
     global device
     global on_submit
     # create a new IoTDevice object
-    device = IoTDevice(port='COM7', baudrate=115200, timeout=1)
+    device = IoTDevice(port='COM8', baudrate=115200, timeout=1)
 
     # connect to the device
     device.connect()
@@ -76,11 +76,11 @@ def readData(message = None):
         start = message.find("!")
         end = message.find("#")
         data =  message[start:end + 1]
-        message = (message[end+1:], "")[end == len(message)]
-        
-        processData(message)
+        processData(data)
+        data = (message[end+1:], "")[end == len(message)]
 
-        return message, data
+        if len(data) < 1: break
+
     
 def processData(data):
     getEnvironmentalData(data)
@@ -90,7 +90,7 @@ def onDataFlow():
     global counter
     counter = counter + 1
 
-    if counter == 100:
+    if counter == 50:
         global QueueData
         temperature = QueueData["temperature"]
         humidity  = QueueData["humidity"]
@@ -99,8 +99,9 @@ def onDataFlow():
 
         global on_submit
         on_submit(temperature, humidity)
+        time.sleep(0.1)
 
-    time.sleep(0.1)
+    time.sleep(1)
     
 
 

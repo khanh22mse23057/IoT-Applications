@@ -12,24 +12,25 @@ import uuid
 import time
 import threading
 import cv2
+import json
 
 TaskQueue = []
 # *********************** Yolobit Process *******************************
 def yolobit_on_subscribe(feed_id, payload):
 
-    if feed_id == CONS.Feeds.Feed1.value:
+    if CONS.Feeds.Feed1.value in feed_id:
         yolobit.setAlarm(parse_value(payload, int))
         return True
 
-    if feed_id == CONS.Feeds.Feed2.value:
+    if  CONS.Feeds.Feed2.value in feed_id:
         yolobit.setFan(parse_value(payload, int))
         return True 
 
-    if feed_id == CONS.Feeds.Feed3.value:
+    if  CONS.Feeds.Feed3.value in feed_id:
         yolobit.setLed(parse_value(payload, int))
         return True
     
-    if feed_id == CONS.Feeds.Feed8.value: 
+    if CONS.Feeds.Feed8.value in feed_id: 
         CONS.IsRunFaceDetection = parse_value(payload, int) == 1
         if CONS.IsRunFaceDetection:
             CONS.IsRunFaceDetection = False
@@ -40,27 +41,26 @@ def yolobit_on_subscribe(feed_id, payload):
     return False
 
 def yolobit_on_env_sync(temperature, humidity):
-    if len(temperature) > 0:
+    if len(str(temperature)) > 0:
         print(temperature)
-        ada.publish(ada.mqtt_client, CONS.Feeds.Feed5.value, temperature)
+        ada.publish(ada.mqtt_client, CONS.Feeds.Feed6.value, str(temperature))
 
-    if len(humidity) > 0:
-        print(temperature)
-        ada.publish(ada.mqtt_client, CONS.Feeds.Feed6.value, humidity)
+    if len(str(humidity)) > 0:
+        print(humidity)
+        ada.publish(ada.mqtt_client, CONS.Feeds.Feed5.value, str(humidity))
     
 # *********************** Mask Detection Process *******************************
 def on_detection(_image, imgbase64, state, is_stranger = False):
     img_str = ""
     try:
         img_str = base64.b64encode(_image)
-        if CONS.Detection_Counter == 0:
+        if CONS.Detection_Counter % 3 == 0:
             print(">>>>>  On Mask Detection: " + state)
 
-            ada.mqtt_client.publish(CONS.Feeds.Feed4.value, imgbase64)
-            ada.mqtt_client.publish(CONS.Feeds.Feed7.value, state)
+            ada.publish(ada.mqtt_client, CONS.Feeds.Feed4.value, imgbase64)
+            ada.publish(ada.mqtt_client, CONS.Feeds.Feed7.value, state)
 
     except Exception as e: print(e)
-
 
     try:   
         if is_stranger:
@@ -78,7 +78,7 @@ def on_detection(_image, imgbase64, state, is_stranger = False):
     except Exception as e: print(e)
 
     try:
-        if CONS.Detection_Counter == 10:
+        if CONS.Detection_Counter == 5:
             yolobit.setAlarm(1)
             yolobit.setLed(1)
             CONS.Detection_Counter = 0
@@ -88,7 +88,12 @@ def on_detection(_image, imgbase64, state, is_stranger = False):
 
 # *********************** Tasks *******************************
 def Task1_Run():
-    firebase.init()
+    def on_submit(key, value):
+            print(">>>>>  Update Object Name: " + value)
+            ada.publish(ada.mqtt_client, CONS.Feeds.Feed9.value, str(value))
+
+    firebase.init(on_submit)
+
 
 def Task2_Run():
     try:
@@ -120,11 +125,10 @@ def Task4_Run():
 # *********************** App Run *******************************
 def run():
 
-    Task1_Run()
-    Task2_Run()
-    # Task3_Run()
-    Task4_Run()
-
+    Task1_Run() # Firebase
+    Task2_Run() # AdFRUIT io MQTT 
+    # Task3_Run() #Yolobit
+    Task4_Run() # Face detection
     while True:
 
         time.sleep(0.01)

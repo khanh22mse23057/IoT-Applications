@@ -13,7 +13,7 @@ def connected(client):
 # Connected function will be called when the client connects.
     for feed in (Cons.Feeds):
         print('Subscribed feed: [{0}] .'.format(feed.value))  
-        client.subscribe(feed.value)
+        client.subscribe(f"{config.ADAFRUIT_IO_USERNAME}.{feed.value}")
     
 def disconnected(client):
     print('Disconnected from Adafruit IO!')

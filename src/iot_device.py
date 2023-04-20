@@ -45,7 +45,7 @@ class IoTDevice:
             self.cmd_buffer = self.cmd_buffer + nData
             print("\n" + nData)
             while ("#" in self.cmd_buffer) and ("!" in self.cmd_buffer):
-                return nData
+                return self.cmd_buffer
 
     def listen(self):
         print(">>> Start IoTDevice Listener")
