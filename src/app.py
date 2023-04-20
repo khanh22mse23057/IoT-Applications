@@ -1,15 +1,16 @@
+from  utils import *
+import constants as CONS
+
 import adafruit_helper as ada
 import mask_detection as mdect
-import face_recognitions as frecog
-import base64
-import constants as CONS
+
 import yolobit_controller as yolobit
 import firebase_services as firebase
+from datetime import datetime
+import base64
 import uuid
 import time
 import threading
-from  utils import *
-from datetime import datetime
 import cv2
 
 TaskQueue = []
@@ -49,39 +50,39 @@ def yolobit_on_env_sync(temperature, humidity):
     
 # *********************** Mask Detection Process *******************************
 def on_detection(_image, imgbase64, state, is_stranger = False):
+    img_str = ""
     try:
+        img_str = base64.b64encode(_image)
         if CONS.Detection_Counter == 0:
             print(">>>>>  On Mask Detection: " + state)
-            img_str = base64.b64encode(_image)
+
             ada.mqtt_client.publish(CONS.Feeds.Feed4.value, imgbase64)
             ada.mqtt_client.publish(CONS.Feeds.Feed7.value, state)
 
     except Exception as e: print(e)
 
-    _id = str(uuid.uuid4())
-    _data = { "id": _id, "image": img_str.decode('utf-8'), "name": "Unknow", "state": state , "date": datetime.now().isoformat()}
-    def processFace(_id, data):
-        try:   
-            if is_stranger:
-                CONS.Detection_Counter = CONS.Detection_Counter + 1
 
-                firebase.add_face(_id, data)
+    try:   
+        if is_stranger:
+            print("\n>> Detect Stranger")
+            _id = str(uuid.uuid4()).replace("-","")
+            _data = { "id": _id, "image": img_str.decode('utf-8'), "name": "Unknow", "state": state , "date": datetime.now().isoformat()}
+            CONS.Detection_Counter = CONS.Detection_Counter + 1
 
-                print(">> Detect Stranger")
-                cv2.imwrite('./images/' + _id + '.jpg', _image)
-                CONS.IsFaceDataSetUpdated = True    
+            firebase.add_face(_id, _data)
 
-        except Exception as e: print(e)
 
-        try:
-            if CONS.Detection_Counter == 10:
-                yolobit.setAlarm(1)
-                yolobit.setLed(1)
-                CONS.Detection_Counter = 0
-        except Exception as e: print(e)
-    
-        _t = threading.Thread(target=processFace, args=(_id, _data))
-        _t.start()
+            cv2.imwrite('./images/' + _id + '.jpg', _image)
+            CONS.IsFaceDataSetUpdated = True    
+
+    except Exception as e: print(e)
+
+    try:
+        if CONS.Detection_Counter == 10:
+            yolobit.setAlarm(1)
+            yolobit.setLed(1)
+            CONS.Detection_Counter = 0
+    except Exception as e: print(e)
 
 
 
@@ -122,7 +123,7 @@ def run():
     Task1_Run()
     Task2_Run()
     # Task3_Run()
-    # Task4_Run()
+    Task4_Run()
 
     while True:
 

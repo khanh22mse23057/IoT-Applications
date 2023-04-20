@@ -11,7 +11,7 @@ import base64
 onDetection = None
 PATH =  "./input_model"
 def on_publish(client, userdata, mid):
-    print("Image published to Adafruit!")
+    print("\nImage published to Adafruit!")
 
 
 def processImage(image, state, is_stranger, onDetection):
@@ -38,8 +38,11 @@ def start(onDetection):
     # t.start()
 
 def run_detection(onDetection):
-    print(">> Detecting the human face") 
+
     count = -1
+    if count < 0:
+       print("\n>> Detecting the human face") 
+
     # Disable scientific notation for clarity
     np.set_printoptions(suppress=True)
     # Load the model
@@ -89,11 +92,11 @@ def run_detection(onDetection):
                 last_class_name = class_name
                 # print("Class:", class_name[2:], end="")
                 # print("Confidence Score:", str(np.round(confidence_score * 100))[:-2], "%")
-            f, object_name = face_recognitions.recognize(known_face_encodings, known_face_names, _image)
+            _frame, object_name = face_recognitions.recognize(known_face_encodings, known_face_names, _image, class_name[2:])
 
             if count % 50 == 0:
                 is_stranger = (object_name == "Unknown")
-                processImage(_image, class_name[2:], is_stranger, onDetection)
+                processImage(_frame, class_name[2:], is_stranger, onDetection)
                 time.sleep(0.1)
 
             # # Display the resulting image

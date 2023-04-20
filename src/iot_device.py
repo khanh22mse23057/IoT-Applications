@@ -48,7 +48,7 @@ class IoTDevice:
                 return nData
 
     def listen(self):
-        print(">>> Start IoTDevice Listner")
+        print(">>> Start IoTDevice Listener")
         while True:
             if IsRunFaceDetection == False:
                 self.disconnect()

@@ -36,7 +36,6 @@ def Run(_on_submit):
 
     on_submit = _on_submit
 
-
 # Send command to Actuators
 def setRelayState(state, deviceId="1"):
     print("setDevice1 => State: " + str(state))

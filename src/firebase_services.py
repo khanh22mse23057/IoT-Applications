@@ -39,6 +39,7 @@ def handle_data_change(event):
             if str(path[1]) == "name":
                 print(f"Value: {event.data}")
                 CONS.FaceDataSet[str(path[0])] = event.data
+                CONS.IsFaceDataSetUpdated = True
             # faces_ref = ref.child(path[0])
             # face = faces_ref.get()
             # update_face_dataset(face)
